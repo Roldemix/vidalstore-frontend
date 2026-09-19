@@ -1,0 +1,14 @@
+<div class="home-container">
+  @if (loading()) {
+    <p>Cargando...</p>
+  } @else {
+    <h2>Bienvenido a VidalStore</h2>
+    <p>Sesión activa: {{ email() }}</p>
+    <p>Rol(es): {{ groups().join(', ') || 'sin grupo asignado' }}</p>
+
+    <button (click)="onLogout()">Cerrar sesión</button>
+
+    <hr />
+    <p><em>Catálogo, biblioteca y compras: pendiente</em></p>
+  }
+</div>
