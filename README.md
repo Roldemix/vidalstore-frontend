@@ -1,59 +1,64 @@
-# VidalstoreFrontend
+# VidalStore · Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.24.
+Aplicación Angular con AWS Amplify contra el user pool de Cognito del
+proyecto VidalStore (DSY1107). Ver el README del backend
+(`vidalstore-backend`) para la arquitectura completa y los datos de
+configuración de Cognito.
 
-## Development server
+## Requisitos previos
 
-To start a local development server, run:
+- Node.js 20+ y npm.
+- El gateway (`vidalstore-backend/gateway`) corriendo en
+  `http://localhost:8080`, ya que el catálogo, las compras y la biblioteca
+  dependen de él.
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Levantamiento
 
 ```bash
-ng generate component component-name
+npm install
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+La aplicación queda disponible en `http://localhost:4200`.
 
-```bash
-ng generate --help
+## Configuración de Amplify
+
+Los datos de conexión a Cognito están en `src/amplify-config.ts`:
+
+```typescript
+export const amplifyConfig = {
+  Auth: {
+    Cognito: {
+      userPoolId: 'us-east-1_X943Nbyxr',
+      userPoolClientId: '4u00fq0k17u5r7ldm7rn1jm9hj',
+      region: 'us-east-1',
+    },
+  },
+};
 ```
 
-## Building
+`userPoolId` y `userPoolClientId` son públicos por diseño (cualquiera puede
+verlos inspeccionando el bundle de la aplicación en el navegador), por lo
+que se versionan con su valor real sin problema.
 
-To build the project run:
+## Funcionalidades implementadas
 
-```bash
-ng build
-```
+- **Registro** (`/register`): creación de cuenta con email/contraseña y
+  confirmación por código enviado al correo (Amplify `signUp` +
+  `confirmSignUp`).
+- **Login** (`/login`): formulario propio (no Hosted UI), usando Amplify
+  `signIn`.
+- **Guard de rutas** (`auth-guard.ts`): protege la ruta raíz (`/`)
+  verificando que exista una sesión activa (`getCurrentUser`); si no la hay,
+  redirige a `/login`.
+- **Interceptor HTTP** (`auth-interceptor.ts`): adjunta el `access_token`
+  únicamente a las peticiones dirigidas al gateway
+  (`http://localhost:8080`), definido en una lista explícita de destinos
+  permitidos. Cualquier otra petición pasa sin el token.
+- **Lectura de claims**: `AuthService.getUserGroups()` extrae
+  `cognito:groups` del `access_token` para mostrar u ocultar elementos de
+  la interfaz según el rol.
+- **Catálogo, compra y biblioteca**: la vista `Home` consume el gateway a
+  través del servicio `Catalogo` (`src/app/catalogo.ts`), que usa
+  `HttpClient` (y por lo tanto pasa por el interceptor automáticamente).
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
