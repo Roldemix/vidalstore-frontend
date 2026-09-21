@@ -1,0 +1,48 @@
+<div class="home-container">
+  @if (loading()) {
+    <p>Cargando...</p>
+  } @else {
+    <h2>Bienvenido a VidalStore</h2>
+    <p>Sesión activa: {{ email() }}</p>
+    <p>Rol(es): {{ groups().join(', ') || 'sin grupo asignado' }}</p>
+
+    <button (click)="onLogout()">Cerrar sesión</button>
+
+    <hr />
+
+    <h3>Catálogo</h3>
+    <ul>
+      @for (juego of juegos(); track juego.id) {
+        <li>
+          {{ juego.nombre }} — ${{ juego.precio }}
+          @if (yaComprado(juego.id)) {
+            <span> (ya en tu biblioteca)</span>
+          } @else {
+            <button
+              (click)="comprar(juego.id)"
+              [disabled]="comprando() === juego.id"
+            >
+              {{ comprando() === juego.id ? 'Comprando...' : 'COMPRAR' }}
+            </button>
+          }
+
+          @if (esEditor) {
+            <button>Editar (pendiente)</button>
+          }
+        </li>
+      }
+    </ul>
+
+    <h3>Mi biblioteca</h3>
+    <ul>
+      @for (licencia of biblioteca(); track licencia.id) {
+        <li>Juego {{ licencia.juegoId }} — comprado el {{ licencia.fecha }}</li>
+      }
+    </ul>
+
+    @if (esAdmin) {
+      <hr />
+      <p><em>Panel de administración: revocar licencias (pendiente)</em></p>
+    }
+  }
+</div>
