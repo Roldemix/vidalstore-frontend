@@ -8,13 +8,20 @@
 
     <button (click)="onLogout()">Cerrar sesión</button>
 
+    @if (error()) {
+      <p style="color: #b00020">{{ error() }}</p>
+    }
+    @if (aviso()) {
+      <p style="color: #1b7a3d">{{ aviso() }}</p>
+    }
+
     <hr />
 
     <h3>Catálogo</h3>
     <ul>
       @for (juego of juegos(); track juego.id) {
         <li>
-          {{ juego.nombre }} — ${{ juego.precio }}
+          {{ juego.titulo }} — ${{ juego.precio }}
           @if (yaComprado(juego.id)) {
             <span> (ya en tu biblioteca)</span>
           } @else {
@@ -36,13 +43,27 @@
     <h3>Mi biblioteca</h3>
     <ul>
       @for (licencia of biblioteca(); track licencia.id) {
-        <li>Juego {{ licencia.juegoId }} — comprado el {{ licencia.fecha }}</li>
+        <li>{{ licencia.titulo ?? ('Juego ' + licencia.juegoId) }} — comprado el {{ licencia.adquiridaEn | date:'dd-MM-yyyy HH:mm' }}</li>
       }
     </ul>
 
     @if (esAdmin) {
       <hr />
-      <p><em>Panel de administración: revocar licencias (pendiente)</em></p>
+      <h3>Administración: licencias</h3>
+      <button (click)="cargarLicencias()">Actualizar</button>
+      <ul>
+        @for (l of licencias(); track l.id) {
+          <li>
+            Juego {{ l.juegoId }} — usuario {{ l.usuarioSub }} — {{ l.estado }}
+            — {{ l.adquiridaEn | date:'dd-MM-yyyy HH:mm' }}
+            @if (l.estado === 'activa') {
+              <button (click)="revocar(l.id)" [disabled]="revocando() === l.id">
+                {{ revocando() === l.id ? 'Revocando...' : 'REVOCAR' }}
+              </button>
+            }
+          </li>
+        }
+      </ul>
     }
   }
 </div>
