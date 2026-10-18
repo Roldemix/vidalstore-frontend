@@ -5,16 +5,28 @@ const GATEWAY_URL = 'http://localhost:8080/v1';
 
 export interface Juego {
   id: string;
-  nombre: string;
+  titulo: string;
   precio: number;
 }
 
 export interface Licencia {
   id: string;
   juegoId: string;
-  usuarioId: string;
-  fecha: string;
-  revocada: boolean;
+  titulo: string | null;
+  usuarioSub: string;
+  adquiridaEn: string;
+  estado: 'activa' | 'revocada';
+}
+
+// Lo que ve el administrador: todas las licencias, sin título compuesto.
+export interface LicenciaAdmin {
+  id: string;
+  juegoId: string;
+  usuarioSub: string;
+  adquiridaEn: string;
+  estado: 'activa' | 'revocada';
+  revocadaEn: string | null;
+  revocadaPor: string | null;
 }
 
 @Injectable({
@@ -33,5 +45,15 @@ export class Catalogo {
 
   getBiblioteca() {
     return this.http.get<Licencia[]>(`${GATEWAY_URL}/biblioteca`);
+  }
+
+  getLicencias() {
+    return this.http.get<LicenciaAdmin[]>(`${GATEWAY_URL}/licencias`);
+  }
+
+  revocar(licenciaId: string, motivo: string) {
+    return this.http.delete<LicenciaAdmin>(`${GATEWAY_URL}/licencias/${licenciaId}`, {
+      body: { motivo },
+    });
   }
 }
