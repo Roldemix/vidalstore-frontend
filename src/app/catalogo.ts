@@ -29,6 +29,12 @@ export interface LicenciaAdmin {
   revocadaPor: string | null;
 }
 
+export interface PanelEnVivo {
+  kpi: Array<{ juegoId: string; minuto: string; tipo: string; unidades: number; monto: number }>;
+  alertas: Array<{ eventoId: string; juegoId: string; enError: number; terminadas: number }>;
+  ventas: Array<{ juegoId: string; semana: string; tipo: string; unidades: number; monto: number }>;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -55,5 +61,9 @@ export class Catalogo {
     return this.http.delete<LicenciaAdmin>(`${GATEWAY_URL}/licencias/${licenciaId}`, {
       body: { motivo },
     });
+  }
+
+  getPanel() {
+    return this.http.get<PanelEnVivo>(`${GATEWAY_URL}/panel/en-vivo`);
   }
 }
