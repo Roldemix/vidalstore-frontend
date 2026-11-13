@@ -1,0 +1,26 @@
+<section>
+  <h2>Panel en vivo</h2>
+  @if (error()) {
+    <p style="color: #b00020">{{ error() }}</p>
+  }
+  @if (datos(); as panel) {
+    <h3>KPIs por minuto</h3>
+    <ul>
+      @for (fila of panel.kpi; track fila.juegoId + fila.minuto + fila.tipo) {
+        <li>{{ fila.juegoId }} · {{ fila.tipo }} · {{ fila.unidades }} unidades · ${{ fila.monto }}</li>
+      }
+    </ul>
+    <h3>Alertas</h3>
+    <ul>
+      @for (alerta of panel.alertas; track alerta.eventoId) {
+        <li>{{ alerta.juegoId }} · {{ alerta.enError }}/{{ alerta.terminadas }} partidas con error</li>
+      }
+    </ul>
+    <h3>Ventas semanales</h3>
+    <ul>
+      @for (venta of panel.ventas; track venta.juegoId + venta.semana + venta.tipo) {
+        <li>{{ venta.juegoId }} · {{ venta.tipo }} · {{ venta.unidades }} unidades · ${{ venta.monto }}</li>
+      }
+    </ul>
+  }
+</section>
