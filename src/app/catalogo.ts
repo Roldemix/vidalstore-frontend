@@ -1,7 +1,20 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-const GATEWAY_URL = 'http://localhost:8080/v1';
+// La API vive bajo el mismo origen que el frontend: Caddy sirve la aplicacion
+// estatica en / y reenvia /v1/* al gateway. Solo en desarrollo local se apunta
+// al gateway del compose, porque `ng serve` usa el puerto 4200.
+const RUTA_API = '/v1';
+const GATEWAY_LOCAL = 'http://localhost:8080/v1';
+
+function baseApi(): string {
+  if (typeof window === 'undefined') return GATEWAY_LOCAL;
+  const { hostname, origin } = window.location;
+  const esLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+  return esLocal ? GATEWAY_LOCAL : `${origin}${RUTA_API}`;
+}
+
+const GATEWAY_URL = baseApi();
 
 export interface Juego {
   id: string;

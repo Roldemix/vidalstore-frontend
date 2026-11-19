@@ -7,14 +7,11 @@ RUN npm ci --no-audit --no-fund
 COPY . .
 RUN npm run build
 
-FROM node:22-alpine
+# Imagen estatica: Caddy sirve la aplicacion compilada y hace de mismo origen
+# para /v1/* en el gateway de la nube.
+FROM caddy:2-alpine
 
-WORKDIR /app
-ENV NODE_ENV=production
-ENV PORT=4200
-COPY package*.json ./
-RUN npm ci --omit=dev --no-audit --no-fund
-COPY --from=build /app/dist ./dist
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/dist/vidalstore-frontend/browser /srv
 
-EXPOSE 4200
-CMD ["node", "dist/vidalstore-frontend/server/server.mjs"]
+EXPOSE 80

@@ -1,0 +1,8 @@
+:80 {
+	root * /srv
+	encode zstd gzip
+
+	# Rutas prerenderizadas primero (carpeta/index.html), luego el index de la SPA.
+	try_files {path} {path}/ /index.html
+	file_server
+}
