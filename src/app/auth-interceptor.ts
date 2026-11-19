@@ -2,16 +2,23 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { from, switchMap } from 'rxjs';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-// Lista explícita de destinos permitidos para adjuntar el token.
-// Hoy solo el gateway de VidalStore.
-const ALLOWED_DESTINATIONS = ['http://localhost:8080'];
+// Destinos a los que se les adjunta el token: el gateway local y, en la nube,
+// la misma ruta /v1 del propio origen. Nunca se manda el token a terceros.
+const GATEWAY_LOCAL = 'http://localhost:8080/v1';
+const RUTA_API = '/v1';
+
+function esDestinoPermitido(url: string): boolean {
+  if (url === RUTA_API || url.startsWith(`${RUTA_API}/`)) return true;
+  if (url.startsWith(GATEWAY_LOCAL)) return true;
+  return (
+    typeof window !== 'undefined' &&
+    (url === `${window.location.origin}${RUTA_API}` ||
+      url.startsWith(`${window.location.origin}${RUTA_API}/`))
+  );
+}
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const isAllowedDestination = ALLOWED_DESTINATIONS.some((url) =>
-    req.url.startsWith(url),
-  );
-
-  if (!isAllowedDestination) {
+  if (!esDestinoPermitido(req.url)) {
     return next(req);
   }
 
